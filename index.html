@@ -6,7 +6,6 @@
   <title>Noeira</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
   <style>
 html,body{height:100%;margin:0;overflow:hidden}
@@ -67,8 +66,6 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
 .page{padding:16px}
 }
 </style>
-  <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full" id="appBody">
   <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobile()"></div>
@@ -86,8 +83,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
     <div id="pageTitle" class="font-semibold" style="font-size:15px"></div>
     <div class="flex-1"></div><button class="btn btn-secondary" onclick="toggleFocus()" title="Focus Mode" style="padding:6px 10px"> <i data-lucide="maximize-2" style="width:14px;height:14px"></i> </button>
    </header>
-   <div style="flex:1;overflow-y:auto" id="pageContainer"><!-- DASHBOARD -->
-    <section class="page" id="page-dashboard">
+   <div style="flex:1;overflow-y:auto" id="pageContainer"><section class="page" id="page-dashboard">
      <h1 class="text-2xl font-bold mb-1 glow-text" id="greetingText">Welcome back</h1>
      <p style="color:var(--text2);margin-bottom:24px" id="dashDate"></p>
      <div class="grid gap-4" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
@@ -134,8 +130,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
        <div class="flex gap-2 justify-between" id="weeklyDots"></div>
       </div>
      </div>
-    </section><!-- TIMER -->
-    <section class="page" id="page-timer">
+    </section><section class="page" id="page-timer">
      <h2 class="text-xl font-bold mb-1 glow-text" id="timerTitle">Focus Timer</h2>
      <p style="color:var(--text2);margin-bottom:24px;font-size:14px">Stay focused, one session at a time</p>
      <div class="flex flex-col items-center">
@@ -159,8 +154,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
        <p style="font-size:11px;color:var(--text2);margin-top:6px">Completing a session marks this habit done for today</p>
       </div>
      </div>
-    </section><!-- HABITS -->
-    <section class="page" id="page-habits">
+    </section><section class="page" id="page-habits">
      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
       <h2 class="text-xl font-bold glow-text" id="habitsTitle">Habit Tracker</h2><button class="btn btn-primary" onclick="openHabitForm()"><i data-lucide="plus" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> New Habit</button>
      </div>
@@ -175,8 +169,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
       </div>
      </div>
      <div id="habitsList" class="flex flex-col gap-3"></div>
-    </section><!-- TASKS -->
-    <section class="page" id="page-tasks">
+    </section><section class="page" id="page-tasks">
      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
       <h2 class="text-xl font-bold glow-text" id="tasksTitle">Task Board</h2>
      </div>
@@ -191,14 +184,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
       </form>
      </div>
      <div id="tasksList" class="flex flex-col gap-2"></div>
-    </section><!-- NOTES -->
-    <section class="page" id="page-notes">
+    </section><section class="page" id="page-notes">
      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
       <h2 class="text-xl font-bold glow-text" id="notesTitle">Notes</h2><button class="btn btn-primary" onclick="addNote()"><i data-lucide="plus" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> New Note</button>
      </div>
      <div id="notesList" class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))"></div>
-    </section><!-- STOPWATCH -->
-    <section class="page" id="page-stopwatch">
+    </section><section class="page" id="page-stopwatch">
      <h2 class="text-xl font-bold mb-1 glow-text">Stopwatch</h2>
      <p style="color:var(--text2);margin-bottom:24px;font-size:14px">Track elapsed time</p>
      <div class="flex flex-col items-center">
@@ -209,8 +200,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)}
       </div>
       <div id="lapsList" class="flex flex-col gap-2" style="width:100%;max-width:300px"></div>
      </div>
-    </section><!-- SETTINGS -->
-    <section class="page" id="page-settings">
+    </section><section class="page" id="page-settings">
      <h2 class="text-xl font-bold mb-5 glow-text">Settings</h2>
      <div class="flex flex-col gap-4" style="max-width:400px">
       <div class="card">
@@ -665,63 +655,6 @@ function showToast(msg) {
   setTimeout(() => el.remove(), 3000);
 }
 
-// --- ELEMENT SDK ---
-const defaultConfig = {
-  app_title: 'Noeira',
-  dashboard_greeting: 'Welcome back',
-  timer_label: 'Focus Timer',
-  habits_label: 'Habit Tracker',
-  tasks_label: 'Task Board',
-  notes_label: 'Notes',
-  background_color: '#0b0e1a',
-  surface_color: '#1e2444',
-  text_color: '#e8eaf6',
-  accent_color: '#7c5cfc',
-  secondary_action_color: '#252b50'
-};
-
-function applyConfig(cfg) {
-  document.getElementById('logoText').textContent = cfg.app_title || defaultConfig.app_title;
-  document.getElementById('greetingText').textContent = cfg.dashboard_greeting || defaultConfig.dashboard_greeting;
-  document.getElementById('timerTitle').textContent = cfg.timer_label || defaultConfig.timer_label;
-  document.getElementById('habitsTitle').textContent = cfg.habits_label || defaultConfig.habits_label;
-  document.getElementById('tasksTitle').textContent = cfg.tasks_label || defaultConfig.tasks_label;
-  document.getElementById('notesTitle').textContent = cfg.notes_label || defaultConfig.notes_label;
-
-  const r = document.documentElement.style;
-  r.setProperty('--bg', cfg.background_color || defaultConfig.background_color);
-  r.setProperty('--surface', cfg.surface_color || defaultConfig.surface_color);
-  r.setProperty('--text', cfg.text_color || defaultConfig.text_color);
-  r.setProperty('--accent', cfg.accent_color || defaultConfig.accent_color);
-  r.setProperty('--surface2', cfg.secondary_action_color || defaultConfig.secondary_action_color);
-  r.setProperty('--accent-glow', (cfg.accent_color || defaultConfig.accent_color) + '40');
-}
-
-window.elementSdk.init({
-  defaultConfig,
-  onConfigChange: async (cfg) => applyConfig(cfg),
-  mapToCapabilities: (cfg) => ({
-    recolorables: [
-      { get: () => cfg.background_color || defaultConfig.background_color, set: v => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
-      { get: () => cfg.surface_color || defaultConfig.surface_color, set: v => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
-      { get: () => cfg.text_color || defaultConfig.text_color, set: v => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
-      { get: () => cfg.accent_color || defaultConfig.accent_color, set: v => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
-      { get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color, set: v => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } },
-    ],
-    borderables: [],
-    fontEditable: undefined,
-    fontSizeable: undefined
-  }),
-  mapToEditPanelValues: (cfg) => new Map([
-    ['app_title', cfg.app_title || defaultConfig.app_title],
-    ['dashboard_greeting', cfg.dashboard_greeting || defaultConfig.dashboard_greeting],
-    ['timer_label', cfg.timer_label || defaultConfig.timer_label],
-    ['habits_label', cfg.habits_label || defaultConfig.habits_label],
-    ['tasks_label', cfg.tasks_label || defaultConfig.tasks_label],
-    ['notes_label', cfg.notes_label || defaultConfig.notes_label],
-  ])
-});
-
 // --- INIT ---
 document.body.classList.toggle('light-mode', !S.settings.darkMode);
 document.getElementById('settingsFocus').value = S.settings.focusMin;
@@ -732,5 +665,5 @@ buildNav();
 navigateTo('dashboard');
 lucide.createIcons();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ec4224247e209a7',t:'MTc3NjE4NDYzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
