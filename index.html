@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noeira</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+html,body{height:100%;margin:0;overflow:hidden}
+*{box-sizing:border-box}
+:root{
+--bg:#0b0e1a;--bg2:#111528;--bg3:#181d35;--surface:#1e2444;--surface2:#252b50;
+--border:#2a3158;--text:#e8eaf6;--text2:#9ba3c7;--accent:#7c5cfc;--accent2:#a78bfa;
+--accent-glow:rgba(124,92,252,0.25);--success:#4ade80;--warn:#fbbf24;--danger:#f87171;
+--cyan:#22d3ee;
+}
+.light-mode{
+--bg:#f0f2f8;--bg2:#ffffff;--bg3:#f5f6fc;--surface:#ffffff;--surface2:#eef0f8;
+--border:#d5d9e8;--text:#1e2244;--text2:#5a6080;--accent:#6d4cdb;--accent2:#8b6cf7;
+--accent-glow:rgba(109,76,219,0.15);--success:#22c55e;--warn:#f59e0b;--danger:#ef4444;
+--cyan:#06b6d4;
+}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;display:flex;height:100%}
+.sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 0;z-index:50;transition:all .3s}
+.sidebar-collapsed{width:60px;min-width:60px}
+.sidebar-collapsed .nav-label,.sidebar-collapsed .logo-text,.sidebar-collapsed .sidebar-footer-text{display:none}
+.sidebar-collapsed .logo-wrap{justify-content:center}
+.sidebar-collapsed .nav-btn{justify-content:center;padding:10px}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:10px 18px;margin:2px 8px;border-radius:10px;cursor:pointer;transition:all .2s;color:var(--text2);font-size:14px;font-weight:500;border:none;background:none;width:calc(100% - 16px);text-align:left}
+.nav-btn:hover{background:var(--surface);color:var(--text)}
+.nav-btn.active{background:var(--accent);color:#fff;box-shadow:0 0 20px var(--accent-glow)}
+.page{display:none;flex:1;overflow-y:auto;padding:28px 32px;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;transition:all .2s}
+.card:hover{border-color:var(--accent);box-shadow:0 0 16px var(--accent-glow)}
+.btn{padding:8px 18px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:13px;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{box-shadow:0 0 18px var(--accent-glow);filter:brightness(1.1)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent)}
+.btn-danger{background:var(--danger);color:#fff}
+input[type="text"],input[type="number"],textarea,select{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:inherit;font-size:14px;width:100%;outline:none;transition:border .2s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.progress-ring{transform:rotate(-90deg)}
+.glow-text{text-shadow:0 0 20px var(--accent-glow)}
+.streak-dot{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:14px 20px;color:var(--text);font-size:14px;z-index:999;animation:slideUp .3s ease;box-shadow:0 0 24px var(--accent-glow)}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.focus-mode .sidebar{width:0;min-width:0;padding:0;border:none;overflow:hidden}
+.focus-mode .page{padding:40px}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+.mono{font-family:'Space Mono',monospace}
+@media(max-width:768px){
+.sidebar{position:fixed;left:-220px;height:100%;z-index:100;transition:left .3s}
+.sidebar.mobile-open{left:0}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}
+.mobile-overlay.show{display:block}
+.mobile-toggle{display:flex!important}
+.page{padding:16px}
+}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full" id="appBody">
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobile()"></div>
+  <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+   <div class="flex items-center gap-3 px-5 mb-6 logo-wrap">
+    <div style="width:32px;height:32px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center"><i data-lucide="zap" style="width:18px;height:18px;color:#fff"></i>
+    </div><span class="logo-text font-bold text-lg" id="logoText">Noeira</span>
+   </div>
+   <div class="flex-1 flex flex-col gap-0.5" id="navContainer"></div>
+   <div class="px-4 mt-4"><button class="nav-btn" onclick="toggleSidebar()" style="justify-content:center"> <i data-lucide="panel-left" style="width:16px;height:16px"></i> <span class="nav-label" style="font-size:12px">Collapse</span> </button>
+   </div>
+  </nav>
+  <main style="flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative">
+   <header class="flex items-center gap-3 px-6 py-3" style="background:var(--bg2);border-bottom:1px solid var(--border);min-height:52px"><button class="mobile-toggle btn-secondary btn" style="display:none;padding:6px" onclick="openMobile()" aria-label="Open menu"> <i data-lucide="menu" style="width:18px;height:18px"></i> </button>
+    <div id="pageTitle" class="font-semibold" style="font-size:15px"></div>
+    <div class="flex-1"></div><button class="btn btn-secondary" onclick="toggleFocus()" title="Focus Mode" style="padding:6px 10px"> <i data-lucide="maximize-2" style="width:14px;height:14px"></i> </button>
+   </header>
+   <div style="flex:1;overflow-y:auto" id="pageContainer"><!-- DASHBOARD -->
+    <section class="page" id="page-dashboard">
+     <h1 class="text-2xl font-bold mb-1 glow-text" id="greetingText">Welcome back</h1>
+     <p style="color:var(--text2);margin-bottom:24px" id="dashDate"></p>
+     <div class="grid gap-4" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      <div class="card" id="dashTimer">
+       <div style="color:var(--text2);font-size:12px;margin-bottom:8px">
+        Today's Focus
+       </div>
+       <div class="text-2xl font-bold mono" id="dashFocusTime">
+        0m
+       </div>
+      </div>
+      <div class="card" id="dashHabits">
+       <div style="color:var(--text2);font-size:12px;margin-bottom:8px">
+        Habits Done
+       </div>
+       <div class="text-2xl font-bold" id="dashHabitsDone">
+        0/0
+       </div>
+      </div>
+      <div class="card" id="dashTasks">
+       <div style="color:var(--text2);font-size:12px;margin-bottom:8px">
+        Tasks Done
+       </div>
+       <div class="text-2xl font-bold" id="dashTasksDone">
+        0/0
+       </div>
+      </div>
+      <div class="card" id="dashStreak">
+       <div style="color:var(--text2);font-size:12px;margin-bottom:8px">
+        Best Streak
+       </div>
+       <div class="text-2xl font-bold" style="color:var(--warn)" id="dashBestStreak">
+        0 days
+       </div>
+      </div>
+     </div>
+     <div class="mt-6">
+      <h2 class="font-semibold mb-3">Achievements</h2>
+      <div class="flex flex-wrap gap-3" id="achievementsList"></div>
+     </div>
+     <div class="mt-6">
+      <h2 class="font-semibold mb-3">Weekly Overview</h2>
+      <div class="card">
+       <div class="flex gap-2 justify-between" id="weeklyDots"></div>
+      </div>
+     </div>
+    </section><!-- TIMER -->
+    <section class="page" id="page-timer">
+     <h2 class="text-xl font-bold mb-1 glow-text" id="timerTitle">Focus Timer</h2>
+     <p style="color:var(--text2);margin-bottom:24px;font-size:14px">Stay focused, one session at a time</p>
+     <div class="flex flex-col items-center">
+      <div style="position:relative;width:240px;height:240px;margin-bottom:24px">
+       <svg width="240" height="240" viewbox="0 0 240 240"><circle cx="120" cy="120" r="108" fill="none" stroke="var(--border)" stroke-width="6" /> <circle cx="120" cy="120" r="108" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" class="progress-ring" id="timerRing" stroke-dasharray="678.58" stroke-dashoffset="0" />
+       </svg>
+       <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div class="mono text-4xl font-bold" id="timerDisplay">
+         25:00
+        </div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px" id="timerPhase">
+         Focus
+        </div>
+       </div>
+      </div>
+      <div class="flex gap-3 mb-5"><button class="btn btn-primary" id="timerStartBtn" onclick="toggleTimer()">Start</button> <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+      </div>
+      <div class="flex gap-2 mb-4"><button class="btn btn-secondary timer-preset active" data-mins="25" onclick="setPreset(25,this)">25m</button> <button class="btn btn-secondary timer-preset" data-mins="15" onclick="setPreset(15,this)">15m</button> <button class="btn btn-secondary timer-preset" data-mins="50" onclick="setPreset(50,this)">50m</button>
+      </div>
+      <div class="card" style="max-width:320px;width:100%"><label for="habitLink" style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Link Habit</label> <select id="habitLink" onchange="saveState()"> <option value="">None</option> </select>
+       <p style="font-size:11px;color:var(--text2);margin-top:6px">Completing a session marks this habit done for today</p>
+      </div>
+     </div>
+    </section><!-- HABITS -->
+    <section class="page" id="page-habits">
+     <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <h2 class="text-xl font-bold glow-text" id="habitsTitle">Habit Tracker</h2><button class="btn btn-primary" onclick="openHabitForm()"><i data-lucide="plus" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> New Habit</button>
+     </div>
+     <div id="habitForm" style="display:none" class="card mb-4">
+      <div class="flex gap-3 flex-wrap">
+       <div style="flex:1;min-width:160px"><label for="habitNameInput" style="font-size:12px;color:var(--text2)">Habit Name</label> <input type="text" id="habitNameInput" placeholder="e.g. Meditate">
+       </div>
+       <div style="width:120px"><label for="habitFreq" style="font-size:12px;color:var(--text2)">Frequency</label> <select id="habitFreq"> <option value="daily">Daily</option> <option value="weekly">Weekly</option> </select>
+       </div>
+       <div class="flex items-end gap-2"><button class="btn btn-primary" onclick="addHabit()">Add</button> <button class="btn btn-secondary" onclick="closeHabitForm()">Cancel</button>
+       </div>
+      </div>
+     </div>
+     <div id="habitsList" class="flex flex-col gap-3"></div>
+    </section><!-- TASKS -->
+    <section class="page" id="page-tasks">
+     <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <h2 class="text-xl font-bold glow-text" id="tasksTitle">Task Board</h2>
+     </div>
+     <div class="card mb-4">
+      <form onsubmit="addTask(event)" class="flex gap-3 flex-wrap">
+       <div style="flex:1;min-width:180px"><label for="taskInput" style="font-size:12px;color:var(--text2)">New Task</label> <input type="text" id="taskInput" placeholder="What needs doing?" required>
+       </div>
+       <div style="width:120px"><label for="taskPriority" style="font-size:12px;color:var(--text2)">Priority</label> <select id="taskPriority"> <option value="low">Low</option> <option value="medium" selected>Medium</option> <option value="high">High</option> </select>
+       </div>
+       <div class="flex items-end"><button class="btn btn-primary" type="submit">Add</button>
+       </div>
+      </form>
+     </div>
+     <div id="tasksList" class="flex flex-col gap-2"></div>
+    </section><!-- NOTES -->
+    <section class="page" id="page-notes">
+     <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <h2 class="text-xl font-bold glow-text" id="notesTitle">Notes</h2><button class="btn btn-primary" onclick="addNote()"><i data-lucide="plus" style="width:14px;height:14px;display:inline;vertical-align:middle"></i> New Note</button>
+     </div>
+     <div id="notesList" class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))"></div>
+    </section><!-- STOPWATCH -->
+    <section class="page" id="page-stopwatch">
+     <h2 class="text-xl font-bold mb-1 glow-text">Stopwatch</h2>
+     <p style="color:var(--text2);margin-bottom:24px;font-size:14px">Track elapsed time</p>
+     <div class="flex flex-col items-center">
+      <div class="mono text-5xl font-bold mb-6" id="swDisplay">
+       00:00.00
+      </div>
+      <div class="flex gap-3 mb-6"><button class="btn btn-primary" id="swStartBtn" onclick="toggleStopwatch()">Start</button> <button class="btn btn-secondary" onclick="lapStopwatch()">Lap</button> <button class="btn btn-secondary" onclick="resetStopwatch()">Reset</button>
+      </div>
+      <div id="lapsList" class="flex flex-col gap-2" style="width:100%;max-width:300px"></div>
+     </div>
+    </section><!-- SETTINGS -->
+    <section class="page" id="page-settings">
+     <h2 class="text-xl font-bold mb-5 glow-text">Settings</h2>
+     <div class="flex flex-col gap-4" style="max-width:400px">
+      <div class="card">
+       <div class="flex items-center justify-between">
+        <div>
+         <div class="font-semibold" style="font-size:14px">
+          Dark Mode
+         </div>
+         <div style="font-size:12px;color:var(--text2)">
+          Toggle dark/light theme
+         </div>
+        </div><button class="btn btn-secondary" id="themeToggle" onclick="toggleTheme()"> <i data-lucide="sun" style="width:16px;height:16px"></i> </button>
+       </div>
+      </div>
+      <div class="card">
+       <div class="font-semibold mb-2" style="font-size:14px">
+        Pomodoro Duration
+       </div>
+       <div class="flex gap-2"><label for="settingsFocus" style="font-size:12px;color:var(--text2);flex:1"> Focus (min) <input type="number" id="settingsFocus" min="1" max="120" value="25" onchange="updateSettings()"> </label> <label for="settingsBreak" style="font-size:12px;color:var(--text2);flex:1"> Break (min) <input type="number" id="settingsBreak" min="1" max="30" value="5" onchange="updateSettings()"> </label>
+       </div>
+      </div>
+      <div class="card"><button class="btn btn-danger" onclick="clearAllData()">Reset All Data</button>
+       <p style="font-size:11px;color:var(--text2);margin-top:6px">This will clear all habits, tasks, notes and progress</p>
+      </div>
+     </div>
+    </section>
+   </div>
+  </main>
+  <script>
+// --- STATE ---
+const defaultState = {
+  habits: [], tasks: [], notes: [], settings: { focusMin: 25, breakMin: 5, darkMode: true },
+  pomodoroSessions: 0, totalFocusMin: 0, linkedHabit: '', focusMode: false, dailyLog: {}
+};
+let S = loadState();
+let currentPage = 'dashboard';
+
+// Nav config
+const NAV = [
+  { id: 'dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+  { id: 'timer', icon: 'timer', label: 'Timer' },
+  { id: 'habits', icon: 'flame', label: 'Habits' },
+  { id: 'tasks', icon: 'check-square', label: 'Tasks' },
+  { id: 'notes', icon: 'file-text', label: 'Notes' },
+  { id: 'stopwatch', icon: 'clock', label: 'Stopwatch' },
+  { id: 'settings', icon: 'settings', label: 'Settings' },
+];
+
+// --- PERSISTENCE ---
+function loadState() {
+  try { const s = JSON.parse(localStorage.getItem('noeira_state')); return s ? { ...defaultState, ...s } : { ...defaultState }; }
+  catch { return { ...defaultState }; }
+}
+function saveState() {
+  S.linkedHabit = document.getElementById('habitLink').value;
+  localStorage.setItem('noeira_state', JSON.stringify(S));
+}
+
+// --- DATE HELPERS ---
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+function dayOfWeek(d) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
+
+// --- NAV ---
+function buildNav() {
+  const c = document.getElementById('navContainer');
+  c.innerHTML = '';
+  NAV.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'nav-btn' + (currentPage === n.id ? ' active' : '');
+    b.setAttribute('aria-label', n.label);
+    b.innerHTML = `<i data-lucide="${n.icon}" style="width:18px;height:18px;flex-shrink:0"></i><span class="nav-label">${n.label}</span>`;
+    b.onclick = () => navigateTo(n.id);
+    c.appendChild(b);
+  });
+  lucide.createIcons();
+}
+
+function navigateTo(id) {
+  currentPage = id;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  document.getElementById('pageTitle').textContent = NAV.find(n => n.id === id)?.label || '';
+  buildNav();
+  closeMobile();
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'habits') renderHabits();
+  if (id === 'tasks') renderTasks();
+  if (id === 'notes') renderNotes();
+  if (id === 'timer') populateHabitLink();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
+}
+function openMobile() {
+  document.getElementById('sidebar').classList.add('mobile-open');
+  document.getElementById('mobileOverlay').classList.add('show');
+}
+function closeMobile() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('mobileOverlay').classList.remove('show');
+}
+function toggleFocus() {
+  document.getElementById('appBody').classList.toggle('focus-mode');
+}
+
+// --- TIMER ---
+let timerInterval = null, timerRunning = false, timerSeconds = 0, timerTotal = 25 * 60, isBreak = false;
+
+function setPreset(mins, el) {
+  if (timerRunning) return;
+  document.querySelectorAll('.timer-preset').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  timerTotal = mins * 60;
+  timerSeconds = 0;
+  updateTimerDisplay();
+}
+
+function toggleTimer() {
+  if (timerRunning) { pauseTimer(); } else { startTimer(); }
+}
+
+function startTimer() {
+  timerRunning = true;
+  document.getElementById('timerStartBtn').textContent = 'Pause';
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    if (timerSeconds >= timerTotal) {
+      clearInterval(timerInterval);
+      timerRunning = false;
+      document.getElementById('timerStartBtn').textContent = 'Start';
+      if (!isBreak) {
+        S.pomodoroSessions++;
+        S.totalFocusMin += Math.round(timerTotal / 60);
+        const tk = todayKey();
+        if (!S.dailyLog[tk]) S.dailyLog[tk] = { focus: 0, habits: 0, tasks: 0 };
+        S.dailyLog[tk].focus += Math.round(timerTotal / 60);
+        // Link habit
+        const linked = document.getElementById('habitLink').value;
+        if (linked) {
+          const h = S.habits.find(h => h.id === linked);
+          if (h) { if (!h.completedDates) h.completedDates = []; if (!h.completedDates.includes(tk)) { h.completedDates.push(tk); updateStreak(h); } }
+        }
+        saveState();
+        showToast('🎉 Focus session complete!');
+        isBreak = true;
+        timerTotal = S.settings.breakMin * 60;
+      } else {
+        showToast('Break over! Ready for another round?');
+        isBreak = false;
+        timerTotal = S.settings.focusMin * 60;
+      }
+      timerSeconds = 0;
+      updateTimerDisplay();
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timerStartBtn').textContent = 'Start';
+}
+
+function resetTimer() {
+  pauseTimer();
+  isBreak = false;
+  timerSeconds = 0;
+  timerTotal = S.settings.focusMin * 60;
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const remain = Math.max(0, timerTotal - timerSeconds);
+  const m = Math.floor(remain / 60), s = remain % 60;
+  document.getElementById('timerDisplay').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  document.getElementById('timerPhase').textContent = isBreak ? 'Break' : 'Focus';
+  const circ = 2 * Math.PI * 108;
+  const pct = timerTotal > 0 ? timerSeconds / timerTotal : 0;
+  document.getElementById('timerRing').setAttribute('stroke-dashoffset', circ * (1 - pct));
+}
+
+function populateHabitLink() {
+  const sel = document.getElementById('habitLink');
+  sel.innerHTML = '<option value="">None</option>';
+  S.habits.forEach(h => {
+    const opt = document.createElement('option');
+    opt.value = h.id; opt.textContent = h.name;
+    if (S.linkedHabit === h.id) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+// --- HABITS ---
+function openHabitForm() { document.getElementById('habitForm').style.display = 'block'; }
+function closeHabitForm() { document.getElementById('habitForm').style.display = 'none'; document.getElementById('habitNameInput').value = ''; }
+
+function addHabit() {
+  const name = document.getElementById('habitNameInput').value.trim();
+  if (!name) return;
+  const freq = document.getElementById('habitFreq').value;
+  S.habits.push({ id: Date.now().toString(), name, freq, completedDates: [], streak: 0, bestStreak: 0, createdAt: todayKey() });
+  saveState(); closeHabitForm(); renderHabits();
+}
+
+function toggleHabitToday(id) {
+  const h = S.habits.find(h => h.id === id); if (!h) return;
+  if (!h.completedDates) h.completedDates = [];
+  const tk = todayKey();
+  const idx = h.completedDates.indexOf(tk);
+  if (idx >= 0) h.completedDates.splice(idx, 1); else h.completedDates.push(tk);
+  updateStreak(h);
+  saveState(); renderHabits();
+}
+
+function deleteHabit(id) {
+  S.habits = S.habits.filter(h => h.id !== id);
+  saveState(); renderHabits();
+}
+
+function updateStreak(h) {
+  if (!h.completedDates) { h.streak = 0; return; }
+  const sorted = [...h.completedDates].sort().reverse();
+  let streak = 0;
+  const d = new Date(); d.setHours(0,0,0,0);
+  for (let i = 0; i < 365; i++) {
+    const key = d.toISOString().slice(0, 10);
+    if (sorted.includes(key)) { streak++; d.setDate(d.getDate() - 1); } else if (i === 0) { d.setDate(d.getDate() - 1); continue; } else break;
+  }
+  h.streak = streak;
+  if (streak > (h.bestStreak || 0)) h.bestStreak = streak;
+}
+
+function renderHabits() {
+  const c = document.getElementById('habitsList'); c.innerHTML = '';
+  if (!S.habits.length) { c.innerHTML = '<div class="card" style="text-align:center;color:var(--text2)">No habits yet. Create one to get started!</div>'; return; }
+  const tk = todayKey();
+  S.habits.forEach(h => {
+    const done = h.completedDates?.includes(tk);
+    const el = document.createElement('div');
+    el.className = 'card flex items-center gap-4';
+    el.innerHTML = `
+      <button onclick="toggleHabitToday('${h.id}')" class="flex-shrink-0" style="width:36px;height:36px;border-radius:10px;border:2px solid ${done ? 'var(--success)' : 'var(--border)'};background:${done ? 'var(--success)' : 'transparent'};cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s" aria-label="Toggle ${h.name}">
+        ${done ? '<i data-lucide="check" style="width:18px;height:18px;color:#fff"></i>' : ''}
+      </button>
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold" style="font-size:14px">${h.name}</div>
+        <div style="font-size:12px;color:var(--text2)">${h.freq} · 🔥 ${h.streak || 0} day streak</div>
+      </div>
+      <div class="flex gap-2 items-center flex-shrink-0">
+        <span class="badge" style="background:${h.streak >= 7 ? 'var(--warn)' : 'var(--surface2)'};color:${h.streak >= 7 ? '#000' : 'var(--text2)'}">Best: ${h.bestStreak || 0}</span>
+        <button onclick="deleteHabit('${h.id}')" class="btn btn-secondary" style="padding:6px" aria-label="Delete ${h.name}"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button>
+      </div>`;
+    c.appendChild(el);
+  });
+  lucide.createIcons();
+}
+
+// --- TASKS ---
+function addTask(e) {
+  e.preventDefault();
+  const text = document.getElementById('taskInput').value.trim();
+  if (!text) return;
+  const priority = document.getElementById('taskPriority').value;
+  S.tasks.push({ id: Date.now().toString(), text, priority, done: false, createdAt: todayKey() });
+  document.getElementById('taskInput').value = '';
+  saveState(); renderTasks();
+}
+
+function toggleTask(id) {
+  const t = S.tasks.find(t => t.id === id); if (!t) return;
+  t.done = !t.done;
+  if (t.done) { const tk = todayKey(); if (!S.dailyLog[tk]) S.dailyLog[tk] = { focus: 0, habits: 0, tasks: 0 }; S.dailyLog[tk].tasks++; }
+  saveState(); renderTasks();
+}
+
+function deleteTask(id) { S.tasks = S.tasks.filter(t => t.id !== id); saveState(); renderTasks(); }
+
+function renderTasks() {
+  const c = document.getElementById('tasksList'); c.innerHTML = '';
+  const priOrder = { high: 0, medium: 1, low: 2 };
+  const sorted = [...S.tasks].sort((a, b) => (a.done - b.done) || (priOrder[a.priority] - priOrder[b.priority]));
+  if (!sorted.length) { c.innerHTML = '<div class="card" style="text-align:center;color:var(--text2)">No tasks yet.</div>'; return; }
+  const priColors = { high: 'var(--danger)', medium: 'var(--warn)', low: 'var(--success)' };
+  sorted.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'card flex items-center gap-3';
+    el.style.opacity = t.done ? '0.5' : '1';
+    el.innerHTML = `
+      <button onclick="toggleTask('${t.id}')" style="width:24px;height:24px;border-radius:6px;border:2px solid ${t.done ? 'var(--success)' : 'var(--border)'};background:${t.done ? 'var(--success)' : 'transparent'};cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center" aria-label="Toggle ${t.text}">
+        ${t.done ? '<i data-lucide="check" style="width:12px;height:12px;color:#fff"></i>' : ''}
+      </button>
+      <div class="flex-1 min-w-0" style="${t.done ? 'text-decoration:line-through' : ''}">
+        <span style="font-size:14px">${t.text}</span>
+      </div>
+      <span class="badge" style="background:${priColors[t.priority]}20;color:${priColors[t.priority]};font-size:10px">${t.priority}</span>
+      <button onclick="deleteTask('${t.id}')" class="btn btn-secondary" style="padding:4px" aria-label="Delete task"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>`;
+    c.appendChild(el);
+  });
+  lucide.createIcons();
+}
+
+// --- NOTES ---
+function addNote() {
+  S.notes.push({ id: Date.now().toString(), title: 'Untitled Note', content: '', createdAt: todayKey() });
+  saveState(); renderNotes();
+}
+
+function updateNote(id, field, value) {
+  const n = S.notes.find(n => n.id === id); if (!n) return;
+  n[field] = value; saveState();
+}
+
+function deleteNote(id) { S.notes = S.notes.filter(n => n.id !== id); saveState(); renderNotes(); }
+
+function renderNotes() {
+  const c = document.getElementById('notesList'); c.innerHTML = '';
+  if (!S.notes.length) { c.innerHTML = '<div class="card" style="text-align:center;color:var(--text2)">No notes yet.</div>'; return; }
+  S.notes.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'card flex flex-col gap-2';
+    el.innerHTML = `
+      <div class="flex items-center justify-between">
+        <input type="text" value="${n.title.replace(/"/g,'&quot;')}" onchange="updateNote('${n.id}','title',this.value)" style="background:transparent;border:none;font-weight:600;font-size:15px;padding:0;color:var(--text)">
+        <button onclick="deleteNote('${n.id}')" class="btn btn-secondary" style="padding:4px" aria-label="Delete note"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>
+      </div>
+      <textarea rows="5" placeholder="Write something..." onchange="updateNote('${n.id}','content',this.value)" style="resize:vertical;font-size:13px">${n.content.replace(/</g,'&lt;')}</textarea>
+      <div style="font-size:10px;color:var(--text2)">${n.createdAt}</div>`;
+    c.appendChild(el);
+  });
+  lucide.createIcons();
+}
+
+// --- STOPWATCH ---
+let swInterval = null, swRunning = false, swMs = 0, laps = [];
+
+function toggleStopwatch() {
+  if (swRunning) { clearInterval(swInterval); swRunning = false; document.getElementById('swStartBtn').textContent = 'Start'; }
+  else { swRunning = true; document.getElementById('swStartBtn').textContent = 'Stop'; const start = Date.now() - swMs; swInterval = setInterval(() => { swMs = Date.now() - start; updateSwDisplay(); }, 10); }
+}
+
+function resetStopwatch() { clearInterval(swInterval); swRunning = false; swMs = 0; laps = []; updateSwDisplay(); document.getElementById('swStartBtn').textContent = 'Start'; document.getElementById('lapsList').innerHTML = ''; }
+
+function lapStopwatch() {
+  if (!swRunning) return;
+  laps.push(swMs);
+  const c = document.getElementById('lapsList');
+  const el = document.createElement('div');
+  el.className = 'card flex justify-between';
+  el.style.padding = '8px 14px';
+  el.innerHTML = `<span style="color:var(--text2);font-size:13px">Lap ${laps.length}</span><span class="mono" style="font-size:13px">${formatSw(swMs)}</span>`;
+  c.prepend(el);
+}
+
+function formatSw(ms) { const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000), cs = Math.floor((ms%1000)/10); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`; }
+function updateSwDisplay() { document.getElementById('swDisplay').textContent = formatSw(swMs); }
+
+// --- DASHBOARD ---
+function renderDashboard() {
+  const tk = todayKey();
+  const log = S.dailyLog[tk] || { focus: 0, habits: 0, tasks: 0 };
+  document.getElementById('dashFocusTime').textContent = log.focus + 'm';
+  const todayHabits = S.habits.filter(h => h.completedDates?.includes(tk)).length;
+  document.getElementById('dashHabitsDone').textContent = `${todayHabits}/${S.habits.length}`;
+  const todayTasks = S.tasks.filter(t => t.done).length;
+  document.getElementById('dashTasksDone').textContent = `${todayTasks}/${S.tasks.length}`;
+  const best = Math.max(0, ...S.habits.map(h => h.bestStreak || 0));
+  document.getElementById('dashBestStreak').textContent = best + ' days';
+  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Weekly dots
+  const wd = document.getElementById('weeklyDots'); wd.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const dayLog = S.dailyLog[key];
+    const active = dayLog && dayLog.focus > 0;
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot';
+    dot.style.background = active ? 'var(--accent)' : 'var(--surface2)';
+    dot.style.color = active ? '#fff' : 'var(--text2)';
+    dot.textContent = dayOfWeek(d).slice(0,1);
+    dot.title = key + (dayLog ? ` — ${dayLog.focus}m focus` : '');
+    wd.appendChild(dot);
+  }
+
+  // Achievements
+  const ac = document.getElementById('achievementsList'); ac.innerHTML = '';
+  const achievements = [
+    { name: '🔥 First Streak', check: S.habits.some(h => (h.streak || 0) >= 3), desc: '3-day habit streak' },
+    { name: '⏱️ Focus Master', check: S.pomodoroSessions >= 10, desc: '10 pomodoro sessions' },
+    { name: '📝 Note Taker', check: S.notes.length >= 5, desc: '5 notes created' },
+    { name: '✅ Task Crusher', check: S.tasks.filter(t => t.done).length >= 10, desc: '10 tasks completed' },
+    { name: '🏆 Week Warrior', check: S.habits.some(h => (h.bestStreak || 0) >= 7), desc: '7-day streak' },
+    { name: '💎 Dedicated', check: S.pomodoroSessions >= 50, desc: '50 pomodoro sessions' },
+  ];
+  achievements.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'badge';
+    el.style.background = a.check ? 'var(--accent)' : 'var(--surface2)';
+    el.style.color = a.check ? '#fff' : 'var(--text2)';
+    el.style.padding = '8px 14px';
+    el.style.fontSize = '12px';
+    el.title = a.desc;
+    el.textContent = (a.check ? '' : '🔒 ') + a.name;
+    ac.appendChild(el);
+  });
+}
+
+// --- SETTINGS ---
+function toggleTheme() {
+  S.settings.darkMode = !S.settings.darkMode;
+  document.body.classList.toggle('light-mode', !S.settings.darkMode);
+  saveState();
+}
+
+function updateSettings() {
+  S.settings.focusMin = parseInt(document.getElementById('settingsFocus').value) || 25;
+  S.settings.breakMin = parseInt(document.getElementById('settingsBreak').value) || 5;
+  if (!timerRunning && !isBreak) { timerTotal = S.settings.focusMin * 60; timerSeconds = 0; updateTimerDisplay(); }
+  saveState();
+}
+
+function clearAllData() {
+  // Inline confirmation
+  const btn = event.target;
+  if (btn.dataset.confirm) {
+    localStorage.removeItem('noeira_state');
+    S = { ...defaultState };
+    saveState();
+    navigateTo('dashboard');
+    showToast('All data cleared');
+    btn.textContent = 'Reset All Data';
+    delete btn.dataset.confirm;
+  } else {
+    btn.dataset.confirm = 'true';
+    btn.textContent = 'Click again to confirm';
+    setTimeout(() => { btn.textContent = 'Reset All Data'; delete btn.dataset.confirm; }, 3000);
+  }
+}
+
+// --- TOAST ---
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// --- ELEMENT SDK ---
+const defaultConfig = {
+  app_title: 'Noeira',
+  dashboard_greeting: 'Welcome back',
+  timer_label: 'Focus Timer',
+  habits_label: 'Habit Tracker',
+  tasks_label: 'Task Board',
+  notes_label: 'Notes',
+  background_color: '#0b0e1a',
+  surface_color: '#1e2444',
+  text_color: '#e8eaf6',
+  accent_color: '#7c5cfc',
+  secondary_action_color: '#252b50'
+};
+
+function applyConfig(cfg) {
+  document.getElementById('logoText').textContent = cfg.app_title || defaultConfig.app_title;
+  document.getElementById('greetingText').textContent = cfg.dashboard_greeting || defaultConfig.dashboard_greeting;
+  document.getElementById('timerTitle').textContent = cfg.timer_label || defaultConfig.timer_label;
+  document.getElementById('habitsTitle').textContent = cfg.habits_label || defaultConfig.habits_label;
+  document.getElementById('tasksTitle').textContent = cfg.tasks_label || defaultConfig.tasks_label;
+  document.getElementById('notesTitle').textContent = cfg.notes_label || defaultConfig.notes_label;
+
+  const r = document.documentElement.style;
+  r.setProperty('--bg', cfg.background_color || defaultConfig.background_color);
+  r.setProperty('--surface', cfg.surface_color || defaultConfig.surface_color);
+  r.setProperty('--text', cfg.text_color || defaultConfig.text_color);
+  r.setProperty('--accent', cfg.accent_color || defaultConfig.accent_color);
+  r.setProperty('--surface2', cfg.secondary_action_color || defaultConfig.secondary_action_color);
+  r.setProperty('--accent-glow', (cfg.accent_color || defaultConfig.accent_color) + '40');
+}
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (cfg) => applyConfig(cfg),
+  mapToCapabilities: (cfg) => ({
+    recolorables: [
+      { get: () => cfg.background_color || defaultConfig.background_color, set: v => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => cfg.surface_color || defaultConfig.surface_color, set: v => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => cfg.text_color || defaultConfig.text_color, set: v => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => cfg.accent_color || defaultConfig.accent_color, set: v => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+      { get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color, set: v => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } },
+    ],
+    borderables: [],
+    fontEditable: undefined,
+    fontSizeable: undefined
+  }),
+  mapToEditPanelValues: (cfg) => new Map([
+    ['app_title', cfg.app_title || defaultConfig.app_title],
+    ['dashboard_greeting', cfg.dashboard_greeting || defaultConfig.dashboard_greeting],
+    ['timer_label', cfg.timer_label || defaultConfig.timer_label],
+    ['habits_label', cfg.habits_label || defaultConfig.habits_label],
+    ['tasks_label', cfg.tasks_label || defaultConfig.tasks_label],
+    ['notes_label', cfg.notes_label || defaultConfig.notes_label],
+  ])
+});
+
+// --- INIT ---
+document.body.classList.toggle('light-mode', !S.settings.darkMode);
+document.getElementById('settingsFocus').value = S.settings.focusMin;
+document.getElementById('settingsBreak').value = S.settings.breakMin;
+timerTotal = S.settings.focusMin * 60;
+updateTimerDisplay();
+buildNav();
+navigateTo('dashboard');
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ec4224247e209a7',t:'MTc3NjE4NDYzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
